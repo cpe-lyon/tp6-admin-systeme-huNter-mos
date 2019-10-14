@@ -371,6 +371,10 @@ adrien@server:~$ sudo vgdisplay
 ```
 adrien@server:~$ sudo lvextend -l 100%FREE /dev/volume1/1vData
   New size given (511 extents) not larger than existing size (1279 extents)
+  
+adrien@server:~$ sudo resize2fs /dev/volume1/1vData
+resize2fs 1.44.6 (5-Mar-2019)
+The filesystem is already 1309696 (4k) blocks long.  Nothing to do!
 ```
 
 ## Exercice 3. Exécution de commandes en différé : at et cron
