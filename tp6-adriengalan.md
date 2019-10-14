@@ -1,5 +1,5 @@
 
-### TP 6 - Gestion des disques / Tâches d’administration
+# TP 6 - Gestion des disques / Tâches d’administration
 
 ## Exercice 1 Disques et partitions
 
