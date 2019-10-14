@@ -1,29 +1,123 @@
 
 # TP 6 - Gestion des disques / Tâches d’administration
 
+
 ## Exercice 1 Disques et partitions
 
 **1. Dans l’interface de configuration de votre VM, créez un second disque dur, de 5 Go dynamiquement**
 **alloués ; puis démarrez la VM**
 
+Euh. C'est fait. Je vois pas quoi dire de plus ahah.
+
 
 **2. Vérifiez que ce nouveau disque dur est bien détecté par le système**
+
+```sudo fdisk -l```
+permet d'afficher toutes les partitions du système et on remarque le nouveau disque dur qui s'appelle /dev/sdb
 
 **3. Partitionnez ce disque en utilisant fdisk : créez une première partition de 2 Go de type Linux (n°83),**
 **et une seconde partition de 3 Go en NTFS (n°7)**
 
+On rentre en mode commande avec la commande
+```sudo fdisk /dev/sdb```
+ensuite on fait
+```console
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): o^Hp^C
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): p
+Partition number (1-4, default 1): 1
+First sector (2048-10485759, default 2048): 2048
+Last sector, +/-sectors or +/-size{K,M,G,T,P} (2048-10485759, default 10485759): +2G
+Created a new partition 1 of type 'Linux' and of size 2 GiB.
+
+Command (m for help): n
+Partition type
+   p   primary (1 primary, 0 extended, 3 free)
+   e   extended (container for logical partitions)
+Select (default p): p
+Partition number (2-4, default 2): 2
+First sector (4196352-10485759, default 4196352):
+Last sector, +/-sectors or +/-size{K,M,G,T,P} (4196352-10485759, default 10485759):
+
+Created a new partition 2 of type 'Linux' and of size 3 GiB.
+
+Command (m for help): t
+Partition number (1,2, default 2): 2
+Hex code (type L to list all codes): 7
+
+Changed type of partition 'Linux' to 'HPFS/NTFS/exFAT'.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+```
+
+
+
 **4. A ce stade, les partitions ont été créées, mais elles n’ont pas été formatées avec leur système de fichiers.**
 **A l’aide de la commande mkfs, formatez vos deux partitions ( pensez à consulter le manuel !)**
 
+```console
+adrien@server:~$ sudo mkfs.ext4 /dev/sdb1
+mke2fs 1.44.6 (5-Mar-2019)
+Creating filesystem with 524288 4k blocks and 131072 inodes
+Filesystem UUID: ed3f5b95-0a1a-4f0e-9f0a-c53e14f4e38d
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+adrien@server:~$ sudo mkfs.ntfs /dev/sdb2
+Cluster size has been automatically set to 4096 bytes.
+Initializing device with zeroes: 100% - Done.
+Creating NTFS volume structures.
+mkntfs completed successfully. Have a nice day.
+```
+
+
 **5. Pourquoi la commande df -T, qui affiche le type de système de fichier des partitions, ne fonctionne-telle pas sur notre disque ?**
+
+Cette commande ne fonctionne pas car les partitions ne sont pas montées.
 
 **6. Faites en sorte que les deux partitions créées soient montées automatiquement au démarrage de la**
 **machine, respectivement dans les points de montage /data et /win (vous pourrez vous passer des**
 **UUID en raison de l’impossibilité d’effectuer des copier-coller)**
 
+```
+sudo nano /etc/fstab
+
+UUID=316279b3-d46a-40f8-875a-ccfa6b18a42c / ext4 defaults 0 0
+/swap.img       none    swap    sw      0       0
+UUID=d3f5b95-0a1a-4f0e-9f0a-c53e14f4e38d /data ext4 defaults 0 0
+UUID=10A498163A70F8B8 /win ntfs defaults 0 0
+```
+
+
 **7. Utilisez la commande mount puis redémarrez votre VM pour valider la configuration**
 
+```
+sudo mount -a
+adrien@server:~$ df -T /dev/sdb1
+Filesystem     Type 1K-blocks  Used Available Use% Mounted on
+/dev/sdb1      ext4   1998672  6144   1871288   1% /data
+adrien@server:~$ df -T /dev/sdb2
+Filesystem     Type    1K-blocks  Used Available Use% Mounted on
+/dev/sdb2      fuseblk   3144700 16264   3128436   1% /win
+```
+
 **8. Montez votre clé USB dans la VM**
+
 
 **9. Créez un dossier partagé entre votre VM et votre système hôte (rem. il peut être nécessaire d’installer**
 **les Additions invité de VirtualBox**
